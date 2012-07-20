@@ -62,11 +62,33 @@ class TorCtl
     @cur_circuit=0
     connect
     authenticate
+    @max_onions_pending=get_conf("MaxOnionsPending")
+    @new_circuit_period=get_conf("newcircuitperiod")
+    @new_circuit_dirtiness=get_conf("newcircuitdirtiness")
     set_conf "__DisablePredictedCircuits",1
     set_conf "MaxOnionsPending", 0
     set_conf "newcircuitperiod", 99999999
     set_conf "maxcircuitdirtiness", 99999999
     set_conf "__LeaveStreamsUnattached",1
+  
+    
+    trap("INT"){ shutdown }
+   
+  end
+
+
+  # tidy up after ourselves
+
+  def shutdown
+    puts "shutting down"
+    @pool = []
+    close_current_circuits
+    set_conf "__DisablePredictedCircuits",0
+    set_conf "__LeaveStreamsUnattached",0
+    set_conf "MaxOnionsPending", @max_onions_pending
+    set_conf "newcircuitperiod", @new_circuit_period
+    set_conf "newcircuitdirtiness", @new_circuit_dirtiness
+    @stop_now=true
   end
 
   def close_current_circuits
@@ -201,6 +223,15 @@ class TorCtl
     send_command("SETCONF","#{key}=#{value}")
   end
 
+
+
+  def get_conf(key)
+    r=send_command("GETCONF","#{key}")
+    return r.lines[0].split("=")[1]
+  end
+
+
+
   def set_events(events)
     args=["EXTENDED"]
     args<<events
@@ -259,11 +290,13 @@ class TorCtl
   end
 
   def main_loop
-    loop do   
+    loop do 
+      break if @stop_now
       r=read_reply
       @event_queue << r if r.code[0]=='6'
       process_events
     end
+    @socket.close
   end
 
 end
@@ -304,6 +337,7 @@ if options[:circuits]==0
   exit(0)
 end
 t=TorCtl.new(options)
+
 t.set_events(["STREAM", "CIRC", "ADDRMAP", "NEWDESC"]);
 t.close_current_circuits
 t.get_routers
