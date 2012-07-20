@@ -305,7 +305,7 @@ options[:circuits]=0
 opts=OptionParser.new do |opts|
 
   opts.banner = <<-eos
-tormux v0.1 -- simple controller to multiplex between tor exit nodes
+tormux v0.1 -- simple controller to reverse multiplex between tor exit nodes
 Usage: ./tormux.rb [options] -x EXITNODES
 NOTE: You will need to enable ControlPort in your torrc and possibly set a password,
 tormux will also kill any current tor circuits.
