@@ -156,7 +156,7 @@ class TorCtl
   def build_circuits
     puts "spinning up #{@num_circuits} circuits"
     @guards=@guards.shuffle[0..(@num_guards-1)]
-    @exits.shuffle
+    @exits.shuffle!
     @num_circuits.times do
       build_circuit
     end
@@ -187,8 +187,8 @@ class TorCtl
         ns.flags.shift
       end
     end
-    @exits=@routers.select{|r| r.flags.include?("Exit")}
-    @guards=@routers.select{|r| r.flags.include?("Guard")} - @exits
+    @exits=@routers.select{|r| r.flags.include?("Exit") && r.flags.include?("Fast")}
+    @guards=@routers.select{|r| r.flags.include?("Guard") && r.flags.include?("Fast")} - @exits
     puts "#{@exits.count} exits & #{@guards.count} guards found"
   end
 
