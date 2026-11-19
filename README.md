@@ -1,5 +1,7 @@
 # tormux.rb 
 
+**Status:** not actively developed. I'm not fixing bugs or adding features, but I'll look at pull requests when I can. Forks welcome.
+
 tormux.rb is a single file, zero dependency ruby tor controller for reverse multiplexing outgoing connections between tor exit nodes. By default tor only builds a single circuit, and all your traffic will travel out of a single exit node until the circuit is destroyed and a new circuit is created. but tormux.rb will build and maintain one circuit for each of the number of exit nodes you specify, and round robin your outgoing tor connections between them automatically. 
 
 ## INSTALLATION
